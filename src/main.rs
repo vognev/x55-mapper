@@ -23,6 +23,11 @@ fn main() -> std::io::Result<()> {
 
     println!("Total found devices:  {}", devices.len());
 
+    if 0 == devices.len() {
+        eprintln!("Nothing to do. No devices to map found.");
+        return Ok(())
+    }
+
     // copy capabilities
 
     for device in devices.iter() {
@@ -90,15 +95,24 @@ fn main() -> std::io::Result<()> {
     // start copying events 
 
     loop {
-        let n = epoll::wait(epoll_fd, -1, &mut events_v[..])?;
-        for event in events_v.iter().take(n) {
-            let dev_idx = event.data as usize;
+        match epoll::wait(epoll_fd, -1, &mut events_v[..]) {
+            Ok(n) => {
+                for event in events_v.iter().take(n) {
+                    let dev_idx = event.data as usize;
 
-            let events = devices[dev_idx].fetch_events()?;
+                    let events = devices[dev_idx].fetch_events()?;
 
-            for event in events {
-                fake.emit(&[event])?;
-            }
+                    for event in events {
+                        fake.emit(&[event])?;
+                    }
+                }
+            },
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::Interrupted => {
+                    continue;
+                }
+                _ => return Err(e),
+            },
         }
     }
 }
