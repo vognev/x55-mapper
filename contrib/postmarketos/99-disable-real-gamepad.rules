@@ -1,0 +1,8 @@
+SUBSYSTEM=="input", ATTRS{name}=="gpio-keys-control", SYMLINK+="powkiddy-buttons"
+SUBSYSTEM=="input", ATTRS{name}=="adc-joystick",      SYMLINK+="powkiddy-sticks"
+
+ACTION=="add",    SUBSYSTEM=="input", ATTRS{name}=="Fake Gamepad", RUN+="/bin/chmod ag-rw /dev/powkiddy-buttons"
+ACTION=="add",    SUBSYSTEM=="input", ATTRS{name}=="Fake Gamepad", RUN+="/bin/chmod ag-rw /dev/powkiddy-sticks"
+
+ACTION=="remove", SUBSYSTEM=="input", ATTRS{name}=="Fake Gamepad", RUN+="/bin/chmod ag+rw /dev/powkiddy-buttons"
+ACTION=="remove", SUBSYSTEM=="input", ATTRS{name}=="Fake Gamepad", RUN+="/bin/chmod ag+rw /dev/powkiddy-sticks"
